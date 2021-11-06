@@ -41,13 +41,16 @@ function readPageAttributes() {
     throw new Error(`Invalid repo: "${params.repo}"`);
   }
 
+  // surge.sh's cleaning of URLs does not properly handle query params
+  const url = params.url.substr(-1, 0) === `/` ? params.url : `${params.url}/`
+
   return {
     owner: matches[1],
     repo: matches[2],
     issueTerm,
     issueNumber,
     origin: params.origin,
-    url: params.url,
+    url: url,
     title: params.title,
     description: params.description,
     label: params.label,

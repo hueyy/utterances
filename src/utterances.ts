@@ -1,6 +1,7 @@
 import { pageAttributes as page } from './page-attributes';
 import {
   Issue,
+  User,
   setRepoContext,
   loadIssueByTerm,
   loadIssueByNumber,
@@ -19,7 +20,8 @@ import { getRepoConfig } from './repo-config';
 import { loadToken } from './oauth';
 import { enableReactions } from './reactions';
 import { getLoginUrl } from './oauth';
-import { pageAttributes } from './page-attributes';
+
+let bootstrapRun = false
 
 setRepoContext(page);
 
@@ -33,13 +35,29 @@ function loadIssue(): Promise<Issue | null> {
 async function bootstrap() {
   await loadToken();
   // tslint:disable-next-line:prefer-const
-  let [issue, user] = await Promise.all([
-    loadUser(),
-    loadIssue(),
-    loadTheme(page.theme, page.origin)
-  ]);
+  let user: User | null = {} as User,
+      issue: Issue | null = {} as Issue,
+      hideTimeline = false
+
+  try {
+    const [userResult, issueResult]= await Promise.all([
+      loadUser(),
+      loadIssue(),
+      loadTheme(page.theme, page.origin)
+    ]);
+    user = userResult
+    issue = issueResult
+  } catch (error){
+    console.error(error)
+    hideTimeline = true
+  }
 
   startMeasuring(page.origin);
+  bootstrapRun = true
+
+  if(hideTimeline){
+    return
+  }
 
   const timeline = new TimelineComponent(user, issue);
   document.body.appendChild(timeline.element);
@@ -93,14 +111,24 @@ addEventListener('not-installed', function handleNotInstalled() {
 });
 
 addEventListener('not-logged-in', function handleNotLoggedIn() {
-  removeEventListener('not-logged-in', handleNotLoggedIn);
-  document.querySelector('body')!.insertAdjacentHTML('afterbegin', `
-  <div class="flash flash-error">
-    Error: You are not logged into GitHub. You need to
-    <a href="${getLoginUrl(pageAttributes.url)}" target="_top">login</a>
-    to view reactions and comments.
-  </div>`);
-  scheduleMeasure();
+
+  let tryLater: number
+  const showError = () => {
+    window.clearInterval(tryLater)
+    removeEventListener('not-logged-in', handleNotLoggedIn);
+    document.querySelector('body')!.insertAdjacentHTML('afterbegin', `
+    <div class="flash flash-error">
+      Error: You are not logged into GitHub. You need to
+      <a href="${getLoginUrl(page.url)}" target="_top">login</a>
+      to view reactions and comments.
+    </div>`);
+    scheduleMeasure();
+  }
+
+  if(!bootstrapRun){
+    tryLater = window.setInterval(showError, 500)
+    return
+  }  
 });
 
 async function renderComments(issue: Issue, timeline: TimelineComponent) {

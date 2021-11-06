@@ -93,6 +93,9 @@ function githubFetch(request: Request): Promise<Response> {
         }
       });
     }
+    if (response.status === 422){
+      window.dispatchEvent(new CustomEvent(`not-logged-in`))
+    }
 
     processRateLimit(response);
 

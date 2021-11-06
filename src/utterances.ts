@@ -18,6 +18,8 @@ import { loadTheme } from './theme';
 import { getRepoConfig } from './repo-config';
 import { loadToken } from './oauth';
 import { enableReactions } from './reactions';
+import { getLoginUrl } from './oauth';
+import { pageAttributes } from './page-attributes';
 
 setRepoContext(page);
 
@@ -32,8 +34,8 @@ async function bootstrap() {
   await loadToken();
   // tslint:disable-next-line:prefer-const
   let [issue, user] = await Promise.all([
-    loadIssue(),
     loadUser(),
+    loadIssue(),
     loadTheme(page.theme, page.origin)
   ]);
 
@@ -83,9 +85,20 @@ addEventListener('not-installed', function handleNotInstalled() {
   <div class="flash flash-error">
     Error: utterances is not installed on <code>${page.owner}/${page.repo}</code>.
     If you own this repo,
-    <a href="https://github.com/apps/utterances" target="_top"><strong>install the app</strong></a>.
+    <a href="https://github.com/apps/utterances"><strong>install the app</strong></a>.
     Read more about this change in
     <a href="https://github.com/utterance/utterances/pull/25" target="_top">the PR</a>.
+  </div>`);
+  scheduleMeasure();
+});
+
+addEventListener('not-logged-in', function handleNotLoggedIn() {
+  removeEventListener('not-logged-in', handleNotLoggedIn);
+  document.querySelector('body')!.insertAdjacentHTML('afterbegin', `
+  <div class="flash flash-error">
+    Error: You are not logged into GitHub. You need to
+    <a href="${getLoginUrl(pageAttributes.url)}" target="_top">login</a>
+    to view reactions and comments.
   </div>`);
   scheduleMeasure();
 });

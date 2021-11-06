@@ -11,16 +11,16 @@
     "blog"
   ],
   "homepage": "https://utteranc.es",
-  "bugs": "https://github.com/utterance/utterances/issues",
+  "bugs": "https://github.com/hueyy/utterances/issues",
   "repository": {
     "type": "git",
-    "url": "https://github.com/utterance/utterances.git"
+    "url": "https://github.com/hueyy/utterances.git"
   },
   "scripts": {
     "start": "parcel serve src/*.html src/client.ts src/stylesheets/themes/*/{index,utterances}.scss --no-hmr --port 4000",
     "build": "parcel build src/*.html src/client.ts src/stylesheets/themes/*/{index,utterances}.scss --experimental-scope-hoisting",
     "lint": "tslint --project tsconfig.json",
-    "predeploy": "yarn run build && touch dist/.nojekyll && echo 'utteranc.es' > dist/CNAME",
+    "predeploy": "npm run build && touch dist/.nojekyll && echo 'utterances.huey.xyz' > dist/CNAME",
     "deploy": "gh-pages --dist dist"
   },
   "devDependencies": {

@@ -19,7 +19,7 @@ let script = document.currentScript as HTMLScriptElement;
 if (script === undefined) {
   // Internet Explorer :(
   // tslint:disable-next-line:max-line-length
-  script = document.querySelector('script[src^="https://utteranc.es/client.js"],script[src^="http://localhost:4000/client.js"]') as HTMLScriptElement;
+  script = document.querySelector('script[src^="https://utterances.huey.xyz/client.js"]') as HTMLScriptElement;
 }
 
 // gather script element's attributes
